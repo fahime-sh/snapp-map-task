@@ -27,10 +27,10 @@ const SearchControl: React.FC<SearchControlProps> = ({ setPosition }) => {
                     setMarker(newMarker);
                 }
             } else {
-                console.error("Invalid response from API:", data);
+                console.error(" این مکان یافت نشد، مجدد تلاش کنید:", data);
             }
         } catch (error) {
-            console.error("Error fetching search location:", error);
+            console.error("خطا رد ردسافت اطلاعات:", error);
         }
     }, [map, marker, setPosition]);
 

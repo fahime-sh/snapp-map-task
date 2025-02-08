@@ -1,5 +1,3 @@
-
-
 export const importantLocations = [
     { name: "ایران‌مال", lat: 35.7245, lng: 51.2253 ,icon:"/images/restaurantPointer.png"},
     { name: "تیراژه", lat: 35.7604, lng: 51.4167 ,icon:"/images/restaurantPointer.png"},

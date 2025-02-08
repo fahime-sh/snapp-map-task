@@ -1,23 +1,24 @@
 import React, { FC, useMemo, useRef, useState } from 'react';
 import L from "leaflet";
-import Leaflet from 'leaflet';
 import { useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import {IGetAddress} from "@/utils/constant.type";
 import {importantLocations} from "@/utils/costant";
 import { MapProps } from "@/components/map/Map.type";
+import ClickHandler from "@/utils/Clickhandler";
+import {initLeafletIcons} from "@/utils/initLeaflet";
 import SearchControl from "@/components/searchBox/SearchControl";
 import ZoomController from "@/components/zoomControler/ZoomController";
-import { MapContainer, Marker, Popup, ScaleControl, TileLayer, useMapEvents, ZoomControl } from "react-leaflet";
+import { MapContainer, Marker, Popup, ScaleControl, TileLayer } from "react-leaflet";
 
 
 const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
     const markerRef = useRef<L.Marker | null>(null);
     const [position, setPosition] = useState<[number, number]>(defaultCenter || [35.6892, 51.3890]);    const [selectedLocation, setSelectedLocation] = useState<IGetAddress | null>(null);
-    const [zoom , setZoom]=useState<number>(15)
+    const [zoom, setZoom] = useState<number>(() => 15);
 
-
-    const handleDataLatLng = async (lat: number, lng: number) => {
+    const handleDetectLocation = async (lat: number, lng: number) => {
+        setSelectedLocation(null);
         try {
             const response = await fetch(`/search/get-address?lat=${lat}&lng=${lng}`);
             const data = await response.json();
@@ -38,8 +39,7 @@ const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
         }
     };
 
-
-    const eventHandlers = useMemo(() => ({
+    const mapEventHandlers = useMemo(() => ({
         dragend() {
             const marker = markerRef.current;
             if (marker) {
@@ -50,18 +50,6 @@ const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
         }
     }), []);
 
-    const ClickHandler = () => {
-        useMapEvents({
-            click: async (e) => {
-                console.log(e.latlng)
-                setPosition([e.latlng.lat, e.latlng.lng]);
-                console.log("نقطه انتخاب شده:", e.latlng.lat, e.latlng.lng);
-                await handleDataLatLng(e.latlng.lat , e.latlng.lng);
-            },
-        });
-        return null;
-    };
-
     useEffect(() => {
         if (process.env.NODE_ENV === 'development') {
             import('../../api/mock/client').then(({ worker }) => {
@@ -71,14 +59,7 @@ const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
     }, []);
 
     useEffect(() => {
-        (async function init() {
-            delete (Leaflet.Icon.Default.prototype as any)._getIconUrl;
-            Leaflet.Icon.Default.mergeOptions({
-                iconRetinaUrl: 'leaflet/images/marker-icon-2x.png',
-                iconUrl: 'leaflet/images/marker-icon.png',
-                shadowUrl: 'leaflet/images/marker-shadow.png',
-            });
-        })();
+        initLeafletIcons();
     }, []);
 
     return (
@@ -91,7 +72,8 @@ const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
                 style={{ width: `${width}px`, height: `${height}px` }}
             >
                 <SearchControl setPosition={setPosition} position={position}/>
-                <ClickHandler />
+                <ClickHandler setPosition={setPosition} handleDetectLocation={handleDetectLocation} />
+
                 {/*<ZoomControl position="bottomleft" />*/}
                 <ZoomController zoom={zoom} setZoom={setZoom}/>
                 <ScaleControl position="bottomright" />
@@ -100,12 +82,12 @@ const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
                 />
                 <Marker
                     draggable
-                    eventHandlers={eventHandlers}
+                    eventHandlers={mapEventHandlers}
                     position={position}
                     ref={markerRef}
                     icon={L.icon({
                         iconUrl: "/images/currentPointer.png",
-                        iconSize: [20, 30],
+                        iconSize: [30, 30],
                     })}
                 >
                     <Popup>
@@ -118,13 +100,21 @@ const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
                     {importantLocations?importantLocations.map((location , index)=>(
                         <Marker
                             key={index}
-                            eventHandlers={eventHandlers}
+                            eventHandlers={mapEventHandlers}
                                  position={[location.lat , location.lng]}
                                  ref={markerRef}
                                  icon={L.icon({
                                      iconUrl: location.icon,
                                      iconSize: [20, 30],
-                                 })}/>
+                                 })}>
+                            <Popup>
+                                <strong>مختصات:</strong><br />
+                                <span>
+                            {location?.name}
+                        </span>
+                            </Popup>
+                        </Marker>
+
                     )):null}
             </MapContainer>
         </div>
