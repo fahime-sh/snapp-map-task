@@ -1,41 +1,43 @@
 import React, { FC, useMemo, useRef, useState } from 'react';
-import { useEffect } from 'react';
-import Leaflet, { icon, LatLngLiteral } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import L from "leaflet";
-import { MapContainer, Marker, Popup, ScaleControl, TileLayer, useMapEvents, ZoomControl } from "react-leaflet";
+import Leaflet from 'leaflet';
+import { useEffect } from 'react';
+import 'leaflet/dist/leaflet.css';
+import {IGetAddress} from "@/utils/constant.type";
+import {importantLocations} from "@/utils/costant";
 import { MapProps } from "@/components/map/Map.type";
 import SearchControl from "@/components/searchBox/SearchControl";
-import {importantLocations} from "@/utils/costant";
-import {data, IGetAddressResponse} from "../../config/msw/data";
-const DEFAULT_CENTER: [number, number] = [35.6892, 51.3890];
-const DEFAULT_WIDTH = 600;
-const DEFAULT_HEIGHT = 600;
+import ZoomController from "@/components/zoomControler/ZoomController";
+import { MapContainer, Marker, Popup, ScaleControl, TileLayer, useMapEvents, ZoomControl } from "react-leaflet";
 
-const Map: FC<MapProps> = ({ width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT, location, center }) => {
+
+const Map: FC<MapProps> = ({ width , height , location, defaultCenter }) => {
     const markerRef = useRef<L.Marker | null>(null);
-    const [position, setPosition] = useState<[number, number]>(DEFAULT_CENTER);
-    const [ selectedLocation , setSelectedLocation]=useState<IGetAddressResponse>()
+    const [position, setPosition] = useState<[number, number]>(defaultCenter || [35.6892, 51.3890]);    const [selectedLocation, setSelectedLocation] = useState<IGetAddress | null>(null);
+    const [zoom , setZoom]=useState<number>(15)
 
-    useEffect(() => {
-        if (process.env.NODE_ENV === 'development') {
-            import('../../config/msw/client').then(({ worker }) => {
-                worker.start();
-            });
-        }
-    }, []);
 
-    const handleDataLatLng = async (lat:number , lng:number) => {
+    const handleDataLatLng = async (lat: number, lng: number) => {
         try {
             const response = await fetch(`/search/get-address?lat=${lat}&lng=${lng}`);
             const data = await response.json();
-            setSelectedLocation(data[0])
-
-            console.log("آدرس دریافت شده:", data[0].lat ,data[0].lng , data[0].street , data[0].city);
+            if (!Array.isArray(data) || data.length === 0) {
+                console.warn(" موقعیتی یافت نشد.");
+                setSelectedLocation(null);
+                return;
+            }
+            const location = data[0];
+            if (!location || !location.lat || !location.lng || !location.street || !location.city) {
+                console.warn(" داده نامعتبر دریافت شد:", location);
+                return;
+            }
+            setSelectedLocation(location);
+            console.log(" آدرس دریافت شده:", location.lat, location.lng, location.street, location.city);
         } catch (error) {
-            console.error("خطا در دریافت آدرس:", error);
+            console.error(" خطا در دریافت آدرس:", error);
         }
     };
+
 
     const eventHandlers = useMemo(() => ({
         dragend() {
@@ -61,6 +63,14 @@ const Map: FC<MapProps> = ({ width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT, loc
     };
 
     useEffect(() => {
+        if (process.env.NODE_ENV === 'development') {
+            import('../../api/mock/client').then(({ worker }) => {
+                worker.start();
+            });
+        }
+    }, []);
+
+    useEffect(() => {
         (async function init() {
             delete (Leaflet.Icon.Default.prototype as any)._getIconUrl;
             Leaflet.Icon.Default.mergeOptions({
@@ -76,13 +86,14 @@ const Map: FC<MapProps> = ({ width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT, loc
             <MapContainer
                 id='snapp-shop'
                 center={position}
-                zoom={16}
+                zoom={zoom}
                 zoomControl={false}
                 style={{ width: `${width}px`, height: `${height}px` }}
             >
-                <SearchControl setPosition={setPosition} position={position}/> {/* پاس دادن setPosition به SearchControl */}
+                <SearchControl setPosition={setPosition} position={position}/>
                 <ClickHandler />
-                <ZoomControl position="bottomleft" />
+                {/*<ZoomControl position="bottomleft" />*/}
+                <ZoomController zoom={zoom} setZoom={setZoom}/>
                 <ScaleControl position="bottomright" />
                 <TileLayer
                     url="https://raster.snappmaps.ir/styles/snapp-style/{z}/{x}/{y}{r}.png"

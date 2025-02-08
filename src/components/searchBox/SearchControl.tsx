@@ -1,6 +1,6 @@
 import React, {  useState, useCallback } from "react";
-import { useMap } from "react-leaflet";
 import L from "leaflet";
+import { useMap } from "react-leaflet";
 import {SearchControlProps} from "@/components/searchBox/SearchBox.type";
 
 
@@ -45,23 +45,15 @@ const SearchControl: React.FC<SearchControlProps> = ({ setPosition }) => {
     };
 
     return (
-        <div className="custom-search-container mx-auto" >
-            <span className="searchLabel">
-        <span className="searchText">جست و جو در 🔍</span>
-        <span className="searchCityLabel">تهران</span>
+        <div className="absolute flex items-center bg-white rounded-md p-1 shadow-md z-[999] mt-2 flex-row-reverse custom-search-container  mx-auto" >
+            <span className="text-sm font-bold px-2.5 py-1  rounded-lg mb-1.5 flex flex-row-reverse text-center w-max gap-1.5">
+        <span className="text-custom-black">جست و جو در 🔍</span>
+        <span className="text-indigo-600">تهران</span>
       </span>
             <input
                 type="text"
                 placeholder="...آدرس را وارد کنید"
-                className="searchInput"
-                style={{
-                    padding: "8px",
-                    marginLeft: "8px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px",
-                    width: "200px",
-                    color: "black",
-                }}
+                className="border-0 outline-none px-3 py-2 text-sm w-[20rem] rounded-md text-right text-custom-black"
                 value={searchValue}
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}

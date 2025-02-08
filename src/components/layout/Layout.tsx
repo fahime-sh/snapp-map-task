@@ -8,7 +8,6 @@ import Footer from "@/components/footer/Footer";
 const Layout: React.FC<LayoutProps> = ({ children, className, ...rest }) => {
     return (
         <div className='bg-gray-500 h-full' {...rest}>
-
              <Header />
             <main>{children}</main>
              <Footer />

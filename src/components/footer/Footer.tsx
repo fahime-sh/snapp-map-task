@@ -1,5 +1,4 @@
 import React from "react";
-// import styles from "./Footer.module.scss";
 import Container from "@/components/container/Container";
 import {FooterProps} from "@/components/footer/Footer.type";
 

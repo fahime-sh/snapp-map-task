@@ -1,16 +1,4 @@
-import {string} from "postcss-selector-parser";
 
-type name =string;
-type lat = number;
-type lng=number;
-type icon = string;
-
-type locationsData = [{
-    name:name,
-    lat:lat,
-    lng:lng,
-    icon:icon
-}]
 
 export const importantLocations = [
     { name: "ایران‌مال", lat: 35.7245, lng: 51.2253 ,icon:"/images/restaurantPointer.png"},

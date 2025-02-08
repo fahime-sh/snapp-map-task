@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --background: #ffffff;
+    --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
+}
+
+body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.leaflet-bar-part{
+    width: 10rem!important;
+}
+::-webkit-input-placeholder {
+    color:black;
+}
+.leaflet-center {
+    left: 50%;
+    transform: translate(-50%, 0%);
+}
+
+.leaflet-middle {
+    top: 50%;
+    position: absolute;
+    z-index: 1000;
+    pointer-events: none;
+    transform: translate(0%, -50%);
+}
+
+.leaflet-center.leaflet-middle {
+    transform: translate(-50%, -50%);
+}
+.custom-search-container {
+    justify-self: anchor-center;
+}
+
+.leaflet-bar-part{
+width: -webkit-fill-available !important;
+}

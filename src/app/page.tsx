@@ -11,12 +11,15 @@ const Map = dynamic(
 );
 
 export default function Home() {
+    const DEFAULT_CENTER: [number, number] = [35.6892, 51.3890];
+    const DEFAULT_WIDTH = 600;
+    const DEFAULT_HEIGHT = 600;
 
     return (
         <Layout>
             <Section>
                 <Container>
-                    <Map />
+                    <Map width={DEFAULT_WIDTH} height={DEFAULT_HEIGHT} defaultCenter={DEFAULT_CENTER} />
                 </Container>
             </Section>
         </Layout>
